@@ -157,9 +157,9 @@ class _MyHomePageState extends State<MyHomePage> {
               style: textTheme.displayMedium,
 
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 30, width: double.infinity),
             Text(
-              '${_apod?.date ?? "Loading date..."}\t${_apod?.copyright ?? ""}',
+              '${_apod?.date ?? "Loading date..."}  ${_apod?.copyright ?? ""}',
               style: textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
