@@ -1,12 +1,7 @@
-name: 🚀 Flutter CI/CD
+name: Flutter Linux Build
 
 on:
   push:
-    tags:
-      - 'v*'                    # Trigger on version tags (e.g. v1.0.0)
-    branches:
-      - master
-  workflow_dispatch:          # Allows manual runs
 
 jobs:
   build:
@@ -15,56 +10,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'     # Ensures correct JDK for Android builds :contentReference[oaicite:1]{index=1}
-
-      - name: Set up Flutter SDK
-        uses: subosito/flutter-action@v2
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v4
         with:
           channel: stable
-          cache: true            # Speeds up repeated runs :contentReference[oaicite:2]{index=2}
+          version: 3.0.2
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze project
+      - name: Analyze project source
         run: dart analyze
 
-      - name: Run tests
-        run: flutter test
+      - name: Run build for linux
+        run: flutter build linux --release
+        env:
+          FLUTTER_BUILD_MODE: release
 
-      - name: Build Android APK
-        run: flutter build apk --release
+      # Zip the build output and upload it to the release
+      - name: Zip build output
+        run: zip -r nasa_apod_x64.zip build/linux/x64/release/bundle
 
-      - name: Upload Android artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          name: nasa_apod_x64.zip
 
-      - name: Build Linux desktop
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build libgtk-3-dev
-          flutter build linux --release
-      - uses: actions/upload-artifact@v3
-        with:
-          name: linux-bundle
-          path: build/linux/x64/release/bundle/
-
-      - name: Build Windows desktop
-        runs-on: windows-latest
-        steps:
-          - uses: actions/checkout@v4
-          - uses: subosito/flutter-action@v2
-            with:
-              channel: stable
-              cache: true
-          - run: flutter build windows --release
-          - uses: actions/upload-artifact@v3
-            with:
-              name: windows-exe
-              path: build/windows/runner/Release/
