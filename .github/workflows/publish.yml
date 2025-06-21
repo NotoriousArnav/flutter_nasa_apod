@@ -39,4 +39,5 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: Release-${{ github.run_number }}
           files: build/linux/x64/release/bundle/**/*
